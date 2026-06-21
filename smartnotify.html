@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SmartNotify — Campus, sorted.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --blue:#BFD7FF; --blue-d:#3D6FE0;
+  --purple:#DCC9F7; --purple-d:#8048C9;
+  --green:#C3EFD3; --green-d:#1F9D55;
+  --peach:#FFD9C2; --peach-d:#E2722D;
+  --lavender:#E6DEFB; --lavender-d:#6A4FCB;
+  --sky:#CDEFFF; --sky-d:#1C8FC9;
+  --red:#FFC9C9; --red-d:#D8453E;
+
+  --bg:#FBFAF7; --surface:#FFFFFF; --surface-2:#F4F2EE;
+  --ink:#201E2B; --ink-soft:#5C5868; --ink-faint:#9893A3;
+  --line:#E9E5DD;
+  --radius:18px;
+  --shadow: 0 1px 2px rgba(32,30,43,0.04), 0 8px 24px -12px rgba(32,30,43,0.12);
+}
+html.dark{
+  --bg:#17151E; --surface:#211F2A; --surface-2:#28253333;
+  --ink:#F1EEF7; --ink-soft:#B7B2C4; --ink-faint:#79748A;
+  --line:#34303F;
+  --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 12px 30px -14px rgba(0,0,0,0.6);
+  --blue:#33415C; --blue-d:#9DBBFF;
+  --purple:#3A2F50; --purple-d:#CBADF2;
+  --green:#26402F; --green-d:#7FE3A4;
+  --peach:#4A3325; --peach-d:#FFB37D;
+  --lavender:#352E4D; --lavender-d:#C5B3F5;
+  --sky:#22404D; --sky-d:#7CD6FF;
+  --red:#4A2A2A; --red-d:#FF9B95;
+}
+*{box-sizing:border-box;}
+body{margin:0;}
+body,input,button,textarea,select{font-family:'Inter',sans-serif;}
+h1,h2,h3,.display{font-family:'Sora',sans-serif;}
+.mono{font-family:'JetBrains Mono',monospace;}
+body{
+  background:var(--bg); color:var(--ink);
+  transition:background .35s ease,color .35s ease;
+  min-height:100vh;
+}
+a{color:inherit;}
+button{font-family:inherit; cursor:pointer;}
+::selection{background:var(--lavender); color:var(--ink);}
+::-webkit-scrollbar{width:10px; height:10px;}
+::-webkit-scrollbar-thumb{background:var(--line); border-radius:10px;}
+
+/* ---------- focus ---------- */
+:focus-visible{outline:2px solid var(--blue-d); outline-offset:2px; border-radius:6px;}
+
+@media (prefers-reduced-motion: reduce){
+  *{animation-duration:0.001ms !important; transition-duration:0.001ms !important;}
+}
+
+/* ================= AUTH SCREEN ================= */
+#auth-screen{
+  min-height:100vh; display:flex; align-items:stretch;
+}
+.auth-art{
+  flex:1.1; position:relative; overflow:hidden;
+  background:
+    radial-gradient(circle at 18% 22%, var(--sky) 0%, transparent 45%),
+    radial-gradient(circle at 75% 18%, var(--lavender) 0%, transparent 40%),
+    radial-gradient(circle at 60% 75%, var(--peach) 0%, transparent 45%),
+    radial-gradient(circle at 15% 80%, var(--green) 0%, transparent 40%),
+    var(--surface-2);
+  display:flex; flex-direction:column; justify-content:space-between;
+  padding:48px;
+}
+html.dark .auth-art{
+  background:
+    radial-gradient(circle at 18% 22%, var(--sky) 0%, transparent 45%),
+    radial-gradient(circle at 75% 18%, var(--lavender) 0%, transparent 40%),
+    radial-gradient(circle at 60% 75%, var(--peach) 0%, transparent 45%),
+    radial-gradient(circle at 15% 80%, var(--green) 0%, transparent 40%),
+    #1d1b27;
+}
+.brand-mark{display:flex; align-items:center; gap:10px; font-weight:800; font-size:20px;}
+.brand-dot{width:12px; height:12px; border-radius:4px; background:var(--blue-d); transform:rotate(45deg); flex:none;}
+.auth-art h1{font-size:clamp(32px,4vw,48px); line-height:1.08; max-width:520px; margin:0 0 14px;}
+.auth-art p{color:var(--ink-soft); max-width:440px; font-size:15.5px; line-height:1.6;}
+.auth-stack{display:flex; flex-direction:column; gap:14px; margin-top:36px;}
+.auth-pill{
+  display:flex; align-items:center; gap:12px; background:var(--surface);
+  border:1px solid var(--line); border-radius:14px; padding:12px 16px;
+  box-shadow:var(--shadow); width:fit-content; max-width:420px;
+  animation: floatIn .7s ease both;
+}
+.auth-pill .ic{width:30px;height:30px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:15px;flex:none;}
+.auth-pill b{font-size:13.5px;} .auth-pill span{display:block; font-size:12px; color:var(--ink-faint);}
+@keyframes floatIn{from{opacity:0; transform:translateY(10px);} to{opacity:1; transform:translateY(0);}}
+
+.auth-form-wrap{
+  flex:1; display:flex; align-items:center; justify-content:center; padding:40px 28px;
+}
+.auth-box{width:100%; max-width:380px;}
+.auth-box h2{font-size:26px; margin:0 0 6px;}
+.auth-box .sub{color:var(--ink-soft); font-size:14px; margin:0 0 28px;}
+.field{margin-bottom:16px;}
+.field label{display:block; font-size:12.5px; font-weight:600; color:var(--ink-soft); margin-bottom:6px; letter-spacing:.2px;}
+.field input{
+  width:100%; padding:12px 14px; border-radius:12px; border:1px solid var(--line);
+  background:var(--surface); color:var(--ink); font-size:14.5px; transition:border-color .2s, box-shadow .2s;
+}
+.field input:focus{border-color:var(--blue-d); box-shadow:0 0 0 3px color-mix(in srgb, var(--blue-d) 18%, transparent);}
+.field-hint{font-size:11.5px; color:var(--ink-faint); margin-top:5px;}
+.btn-primary{
+  width:100%; padding:13px; border-radius:12px; border:none; background:var(--ink); color:var(--bg);
+  font-weight:700; font-size:14.5px; transition:transform .15s ease, opacity .15s ease;
+}
+.btn-primary:hover{opacity:.88;}
+.btn-primary:active{transform:scale(.98);}
+.auth-switch{text-align:center; margin-top:20px; font-size:13.5px; color:var(--ink-soft);}
+.auth-switch button{background:none; border:none; color:var(--blue-d); font-weight:700; font-size:13.5px; padding:0;}
+.auth-error{
+  background:var(--red); color:var(--red-d); padding:10px 13px; border-radius:10px; font-size:13px;
+  margin-bottom:16px; font-weight:600; display:none;
+}
+.auth-error.show{display:block;}
+.select-college{
+  display:flex; gap:8px; margin-bottom:16px;
+}
+
+/* ================= APP SHELL ================= */
+#app-screen{display:none;}
+#app-screen.active{display:flex; min-height:100vh;}
+
+.sidebar{
+  width:248px; flex:none; background:var(--surface); border-right:1px solid var(--line);
+  padding:22px 16px; display:flex; flex-direction:column; position:sticky; top:0; height:100vh;
+}
+.sidebar .brand-mark{padding:0 8px; margin-bottom:26px;}
+.nav-section{margin-bottom:18px;}
+.nav-label{font-size:10.5px; text-transform:uppercase; letter-spacing:.8px; color:var(--ink-faint); padding:0 12px; margin-bottom:8px; font-weight:700;}
+.nav-item{
+  display:flex; align-items:center; gap:11px; padding:9px 12px; border-radius:11px; font-size:14px; font-weight:600;
+  color:var(--ink-soft); margin-bottom:2px; border:none; background:none; width:100%; text-align:left;
+  transition:background .15s, color .15s;
+}
+.nav-item:hover{background:var(--surface-2); color:var(--ink);}
+.nav-item.active{background:var(--ink); color:var(--bg);}
+.nav-item .dot{width:8px; height:8px; border-radius:50%; flex:none;}
+.nav-item .count{margin-left:auto; font-size:11px; background:var(--surface-2); padding:2px 7px; border-radius:20px; color:var(--ink-faint); font-weight:700;}
+.nav-item.active .count{background:rgba(255,255,255,.18); color:var(--bg);}
+
+.sidebar-foot{margin-top:auto; padding-top:14px; border-top:1px solid var(--line);}
+.user-card{display:flex; align-items:center; gap:10px; padding:8px; border-radius:12px;}
+.avatar{width:36px; height:36px; border-radius:10px; background:var(--lavender); color:var(--lavender-d); display:flex; align-items:center; justify-content:center; font-weight:800; flex:none; font-size:14px;}
+.user-card b{font-size:13px; display:block;}
+.user-card span{font-size:11.5px; color:var(--ink-faint);}
+.logout-btn{width:100%; margin-top:8px; padding:9px; border-radius:10px; border:1px solid var(--line); background:none; color:var(--ink-soft); font-size:12.5px; font-weight:600;}
+.logout-btn:hover{background:var(--surface-2); color:var(--ink);}
+
+.main{flex:1; min-width:0; padding:26px 32px 60px; max-width:1180px;}
+.topbar{display:flex; align-items:center; gap:14px; margin-bottom:24px; flex-wrap:wrap;}
+.search-wrap{flex:1; min-width:220px; position:relative;}
+.search-wrap input{
+  width:100%; padding:11px 14px 11px 38px; border-radius:12px; border:1px solid var(--line);
+  background:var(--surface); color:var(--ink); font-size:13.5px;
+}
+.search-wrap::before{content:"⌕"; position:absolute; left:13px; top:50%; transform:translateY(-50%); color:var(--ink-faint); font-size:16px;}
+.theme-toggle{
+  display:flex; align-items:center; gap:6px; background:var(--surface); border:1px solid var(--line);
+  border-radius:30px; padding:4px; position:relative;
+}
+.theme-toggle button{
+  border:none; background:none; padding:7px 11px; border-radius:24px; font-size:13px; color:var(--ink-soft); font-weight:600;
+  display:flex; align-items:center; gap:5px; position:relative; z-index:1;
+}
+.theme-toggle button.on{color:var(--bg);}
+.theme-toggle .slider{position:absolute; top:4px; bottom:4px; left:4px; width:calc(50% - 4px); background:var(--ink); border-radius:22px; transition:transform .25s ease; z-index:0;}
+html.dark .theme-toggle .slider{transform:translateX(100%);}
+
+.icon-btn{width:38px; height:38px; border-radius:11px; border:1px solid var(--line); background:var(--surface); display:flex; align-items:center; justify-content:center; font-size:15px; color:var(--ink-soft);}
+.icon-btn:hover{background:var(--surface-2);}
+
+.page-head{margin-bottom:20px;}
+.page-head h1{font-size:24px; margin:0 0 4px;}
+.page-head p{color:var(--ink-soft); font-size:13.5px; margin:0;}
+
+/* emergency strip */
+.emergency-strip{
+  background:linear-gradient(90deg, var(--red), var(--peach));
+  border-radius:16px; padding:14px 18px; display:flex; align-items:center; gap:12px;
+  margin-bottom:22px; position:relative; overflow:hidden; box-shadow:var(--shadow);
+}
+.emergency-strip .pulse{width:10px; height:10px; border-radius:50%; background:var(--red-d); flex:none; animation:pulse 1.6s infinite;}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(216,69,62,.5);}70%{box-shadow:0 0 0 9px rgba(216,69,62,0);}100%{box-shadow:0 0 0 0 rgba(216,69,62,0);}}
+.emergency-strip b{font-size:13.5px; color:var(--ink);}
+.emergency-strip span{font-size:12.5px; color:var(--ink-soft); display:block;}
+
+/* category chip filter row */
+.chip-row{display:flex; gap:8px; flex-wrap:wrap; margin-bottom:22px;}
+.chip{
+  border:1px solid var(--line); background:var(--surface); padding:8px 14px; border-radius:30px; font-size:12.5px;
+  font-weight:600; color:var(--ink-soft); display:flex; align-items:center; gap:7px;
+}
+.chip .dot{width:7px; height:7px; border-radius:50%;}
+.chip.active{background:var(--ink); color:var(--bg); border-color:var(--ink);}
+.chip.active .dot{filter:brightness(1.6);}
+
+/* notification grid */
+.notif-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(310px,1fr)); gap:14px;}
+.card{
+  background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); padding:17px;
+  box-shadow:var(--shadow); border-left:4px solid var(--cat-color, var(--blue-d));
+  display:flex; flex-direction:column; gap:9px; transition:transform .15s ease;
+}
+.card:hover{transform:translateY(-2px);}
+.card-top{display:flex; align-items:center; justify-content:space-between; gap:8px;}
+.cat-badge{
+  font-size:10.5px; font-weight:700; padding:4px 9px; border-radius:20px; text-transform:uppercase; letter-spacing:.4px;
+  background:var(--cat-bg, var(--blue)); color:var(--cat-color, var(--blue-d));
+}
+.unread-dot{width:8px; height:8px; border-radius:50%; background:var(--blue-d); flex:none;}
+.card h3{font-size:14.5px; margin:0; line-height:1.35;}
+.card p{font-size:12.8px; color:var(--ink-soft); margin:0; line-height:1.5;}
+.card-foot{display:flex; align-items:center; justify-content:space-between; margin-top:auto; padding-top:8px; font-size:11.3px; color:var(--ink-faint);}
+.card-actions{display:flex; gap:6px;}
+.mini-btn{border:none; background:var(--surface-2); width:26px; height:26px; border-radius:8px; font-size:12px; color:var(--ink-soft); display:flex; align-items:center; justify-content:center;}
+.mini-btn:hover{background:var(--line);}
+.mini-btn.bookmarked{color:var(--peach-d); background:var(--peach);}
+.priority-tag{font-size:10px; font-weight:800; color:var(--red-d);}
+
+.empty-state{
+  text-align:center; padding:60px 20px; color:var(--ink-faint); border:1.5px dashed var(--line); border-radius:18px;
+}
+.empty-state .em-ic{font-size:30px; margin-bottom:10px;}
+.empty-state b{display:block; color:var(--ink-soft); font-size:14.5px; margin-bottom:4px;}
+
+/* inbox */
+.inbox-layout{display:grid; grid-template-columns:340px 1fr; gap:20px; align-items:start;}
+@media (max-width:880px){.inbox-layout{grid-template-columns:1fr;}}
+.inbox-form{background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); padding:20px; box-shadow:var(--shadow);}
+.inbox-form h3{font-size:15px; margin:0 0 4px;}
+.inbox-form .note{font-size:12px; color:var(--ink-faint); margin:0 0 16px; line-height:1.5;}
+.inbox-form textarea{
+  width:100%; min-height:110px; border-radius:12px; border:1px solid var(--line); padding:12px; font-size:13.5px;
+  background:var(--surface); color:var(--ink); resize:vertical; font-family:inherit;
+}
+.seg-row{display:flex; gap:8px; margin:14px 0;}
+.seg{flex:1; padding:9px; text-align:center; border-radius:10px; border:1px solid var(--line); font-size:12px; font-weight:600; color:var(--ink-soft); background:var(--surface);}
+.seg.active{background:var(--lavender); color:var(--lavender-d); border-color:transparent;}
+.anon-note{display:flex; gap:8px; align-items:flex-start; background:var(--surface-2); padding:10px 12px; border-radius:10px; font-size:11.5px; color:var(--ink-soft); margin-top:14px; line-height:1.5;}
+
+.inbox-list{display:flex; flex-direction:column; gap:10px;}
+.inbox-item{background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:14px 16px; box-shadow:var(--shadow);}
+.inbox-item-top{display:flex; align-items:center; justify-content:space-between; margin-bottom:6px;}
+.anon-tag{display:flex; align-items:center; gap:6px; font-size:11px; font-weight:700; color:var(--ink-faint);}
+.anon-tag .ic{width:20px;height:20px;border-radius:6px;background:var(--surface-2); display:flex; align-items:center; justify-content:center; font-size:11px;}
+.status-pill{font-size:10.5px; font-weight:700; padding:3px 9px; border-radius:20px;}
+.status-open{background:var(--peach); color:var(--peach-d);}
+.status-progress{background:var(--sky); color:var(--sky-d);}
+.status-resolved{background:var(--green); color:var(--green-d);}
+.inbox-item p{font-size:13px; margin:0; line-height:1.55;}
+.inbox-item .meta{font-size:11px; color:var(--ink-faint); margin-top:8px;}
+
+.toast{
+  position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(20px); background:var(--ink); color:var(--bg);
+  padding:12px 20px; border-radius:12px; font-size:13.5px; font-weight:600; box-shadow:var(--shadow);
+  opacity:0; pointer-events:none; transition:all .3s ease; z-index:500; display:flex; align-items:center; gap:8px;
+}
+.toast.show{opacity:1; transform:translateX(-50%) translateY(0);}
+
+.mobile-bar{display:none;}
+@media (max-width:900px){
+  .sidebar{position:fixed; left:0; top:0; bottom:0; z-index:200; transform:translateX(-100%); transition:transform .25s ease; box-shadow:0 0 0 999px rgba(0,0,0,.0);}
+  .sidebar.open{transform:translateX(0); box-shadow:0 0 40px rgba(0,0,0,.25);}
+  .main{padding:18px 16px 60px;}
+  .mobile-bar{display:flex; align-items:center; justify-content:space-between; margin-bottom:16px;}
+  .auth-art{display:none;}
+}
+.scrim{display:none;}
+.scrim.show{display:block; position:fixed; inset:0; background:rgba(0,0,0,.35); z-index:150;}
+</style>
+</head>
+<body>
+
+<!-- ============ AUTH SCREEN ============ -->
+<div id="auth-screen">
+  <div class="auth-art">
+    <div class="brand-mark"><span class="brand-dot"></span> SmartNotify</div>
+    <div>
+      <h1>Every campus update, sorted before it reaches you.</h1>
+      <p>One inbox for exams, results, placements, emergencies and events — no more scrolling five WhatsApp groups to find one circular.</p>
+      <div class="auth-stack">
+        <div class="auth-pill" style="animation-delay:.05s">
+          <div class="ic" style="background:var(--red); color:var(--red-d);">🚨</div>
+          <div><b>Class cancelled — 11 AM, CS301</b><span>Pinned · 2 min ago</span></div>
+        </div>
+        <div class="auth-pill" style="animation-delay:.15s">
+          <div class="ic" style="background:var(--green); color:var(--green-d);">💼</div>
+          <div><b>TCS campus drive — registrations open</b><span>Placements · today</span></div>
+        </div>
+        <div class="auth-pill" style="animation-delay:.25s">
+          <div class="ic" style="background:var(--lavender); color:var(--lavender-d);">🎉</div>
+          <div><b>Hackathon: Code Sprint 2.0</b><span>Events · this week</span></div>
+        </div>
+      </div>
+    </div>
+    <p style="font-size:12px; color:var(--ink-faint); margin:0;">© 2026 SmartNotify — built for students, by students.</p>
+  </div>
+
+  <div class="auth-form-wrap">
+    <div class="auth-box">
+      <div id="auth-error" class="auth-error"></div>
+
+      <!-- LOGIN -->
+      <div id="login-panel">
+        <h2>Welcome back</h2>
+        <p class="sub">Log in with your college email to view your notifications.</p>
+        <div class="field">
+          <label for="login-email">College email</label>
+          <input id="login-email" type="email" placeholder="you@college.edu" autocomplete="username">
+        </div>
+        <div class="field">
+          <label for="login-pass">Password</label>
+          <input id="login-pass" type="password" placeholder="••••••••" autocomplete="current-password">
+        </div>
+        <button class="btn-primary" onclick="handleLogin()">Log in</button>
+        <p class="auth-switch">New here? <button onclick="showPanel('register')">Create an account</button></p>
+      </div>
+
+      <!-- REGISTER -->
+      <div id="register-panel" style="display:none;">
+        <h2>Create your account</h2>
+        <p class="sub">Register once with your college email — you'll log in with this email and password every time.</p>
+        <div class="field">
+          <label for="reg-name">Full name</label>
+          <input id="reg-name" type="text" placeholder="Aditi Sharma">
+        </div>
+        <div class="field">
+          <label for="reg-email">College email</label>
+          <input id="reg-email" type="email" placeholder="you@college.edu" autocomplete="username">
+        </div>
+        <div class="field">
+          <label for="reg-pass">Password</label>
+          <input id="reg-pass" type="password" placeholder="At least 8 characters" autocomplete="new-password">
+          <p class="field-hint">Stored securely (hashed) — never shown in plain text again.</p>
+        </div>
+        <div class="field">
+          <label for="reg-pass2">Confirm password</label>
+          <input id="reg-pass2" type="password" placeholder="Re-enter password" autocomplete="new-password">
+        </div>
+        <button class="btn-primary" onclick="handleRegister()">Create account</button>
+        <p class="auth-switch">Already registered? <button onclick="showPanel('login')">Log in</button></p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ APP SCREEN ============ -->
+<div id="app-screen">
+  <div class="scrim" id="scrim" onclick="toggleSidebar(false)"></div>
+  <aside class="sidebar" id="sidebar">
+    <div class="brand-mark"><span class="brand-dot"></span> SmartNotify</div>
+
+    <div class="nav-section">
+      <div class="nav-item active" data-view="all" onclick="setView('all', this)">
+        <span class="dot" style="background:var(--ink-faint);"></span> All updates <span class="count" id="count-all">0</span>
+      </div>
+      <div class="nav-item" data-view="bookmarked" onclick="setView('bookmarked', this)">
+        <span class="dot" style="background:var(--peach-d);"></span> Bookmarked <span class="count" id="count-bookmarked">0</span>
+      </div>
+      <div class="nav-item" data-view="inbox" onclick="setView('inbox', this)">
+        <span class="dot" style="background:var(--lavender-d);"></span> Inbox <span class="count" id="count-inbox">0</span>
+      </div>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-label">Categories</div>
+      <div id="category-nav"></div>
+    </div>
+
+    <div class="sidebar-foot">
+      <div class="user-card">
+        <div class="avatar" id="user-avatar">?</div>
+        <div><b id="user-name">—</b><span id="user-email">—</span></div>
+      </div>
+      <button class="logout-btn" onclick="handleLogout()">Log out</button>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <button class="icon-btn" id="hamburger" style="display:none;" onclick="toggleSidebar(true)">☰</button>
+      <div class="search-wrap">
+        <input id="search-input" type="text" placeholder="Search notifications, e.g. 'attendance' or 'TCS'" oninput="renderNotifications()">
+      </div>
+      <div class="theme-toggle" id="theme-toggle">
+        <div class="slider"></div>
+        <button id="btn-light" onclick="setTheme('light')">☀ Light</button>
+        <button id="btn-dark" onclick="setTheme('dark')">☾ Dark</button>
+      </div>
+      <button class="icon-btn" title="Notification settings" onclick="showToast('Push notifications are on for this device.')">🔔</button>
+    </div>
+
+    <div id="page-all">
+      <div class="page-head">
+        <h1 id="page-title">All updates</h1>
+        <p id="page-sub">Everything from your college, organized in one place — newest and most urgent first.</p>
+      </div>
+
+      <div class="emergency-strip" id="emergency-strip" style="display:none;">
+        <span class="pulse"></span>
+        <div><b id="emergency-text">—</b><span id="emergency-sub">—</span></div>
+      </div>
+
+      <div class="chip-row" id="chip-row"></div>
+
+      <div class="notif-grid" id="notif-grid"></div>
+    </div>
+
+    <div id="page-inbox" style="display:none;">
+      <div class="page-head">
+        <h1>Inbox</h1>
+        <p>Share a complaint, need or piece of feedback with the college. Anonymous submissions never show your name or email to anyone — including staff.</p>
+      </div>
+      <div class="inbox-layout">
+        <div class="inbox-form">
+          <h3>Submit something</h3>
+          <p class="note">Department-wise grievance routing. Track the status of everything you send below.</p>
+          <div class="field">
+            <label for="inbox-dept">Send to</label>
+            <input list="dept-list" id="inbox-dept" placeholder="e.g. Hostel, Academics, Library">
+            <datalist id="dept-list">
+              <option value="Academics"></option><option value="Hostel & Transport"></option>
+              <option value="Examinations"></option><option value="Placements"></option>
+              <option value="Library"></option><option value="Student Helpdesk"></option>
+            </datalist>
+          </div>
+          <div class="field">
+            <label for="inbox-text">Message</label>
+            <textarea id="inbox-text" placeholder="Describe your complaint, need, or feedback..."></textarea>
+          </div>
+          <div class="seg-row">
+            <button class="seg active" id="seg-anon" onclick="setAnon(true)">🙈 Anonymous</button>
+            <button class="seg" id="seg-named" onclick="setAnon(false)">🙋 Show my name to staff</button>
+          </div>
+          <button class="btn-primary" onclick="submitInbox()">Send message</button>
+          <div class="anon-note">🔒 <span>When you choose Anonymous, your identity is never attached to this message — other students and staff only see the content and department.</span></div>
+        </div>
+        <div class="inbox-list" id="inbox-list"></div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============ DATA ============ */
+const CATEGORIES = [
+  {id:'academic', label:'Academic', icon:'📚', color:'var(--blue-d)', bg:'var(--blue)'},
+  {id:'emergency', label:'Emergency & Urgent', icon:'🚨', color:'var(--red-d)', bg:'var(--red)'},
+  {id:'events', label:'Events & Activities', icon:'🎉', color:'var(--purple-d)', bg:'var(--purple)'},
+  {id:'placements', label:'Placements & Careers', icon:'💼', color:'var(--green-d)', bg:'var(--green)'},
+  {id:'campus', label:'Campus & Other', icon:'🌟', color:'var(--peach-d)', bg:'var(--peach)'},
+];
+
+let NOTIFICATIONS = [
+  {id:1, cat:'emergency', title:'Class cancelled — CS301, 11:00 AM', body:'Today\'s Data Structures lecture is cancelled due to faculty unavailability. Makeup class to be announced.', time:'2 min ago', priority:true, read:false, bookmarked:false},
+  {id:2, cat:'academic', title:'Semester exam timetable released', body:'Even semester exam schedule for all branches is now live on the academic portal. Check your slot.', time:'1 hr ago', priority:false, read:false, bookmarked:false},
+  {id:3, cat:'academic', title:'Assignment deadline: DBMS Unit 3', body:'Submit your DBMS assignment via the portal by Friday, 11:59 PM. Late submissions lose 10% per day.', time:'3 hrs ago', priority:false, read:false, bookmarked:false},
+  {id:4, cat:'academic', title:'Attendance below 75% — ECE 4th sem', body:'Students with shortage have been listed. Visit the department office before Monday to avoid detention.', time:'5 hrs ago', priority:false, read:true, bookmarked:false},
+  {id:5, cat:'placements', title:'TCS campus drive — registrations open', body:'Eligible 2027 batch students can register for the TCS NQT drive. Last date to apply: this Sunday.', time:'40 min ago', priority:false, read:false, bookmarked:true},
+  {id:6, cat:'placements', title:'Resume-building workshop', body:'Career Services is hosting a hands-on resume workshop in Seminar Hall 2, Thursday 3 PM.', time:'1 day ago', priority:false, read:true, bookmarked:false},
+  {id:7, cat:'events', title:'Hackathon: Code Sprint 2.0', body:'48-hour hackathon, teams of 4. Prize pool ₹50,000. Registrations close in 3 days.', time:'6 hrs ago', priority:false, read:false, bookmarked:false},
+  {id:8, cat:'events', title:'Cultural fest — Aurora 2026', body:'Annual cultural fest dates announced. Volunteer sign-ups now open for all clubs.', time:'1 day ago', priority:false, read:false, bookmarked:false},
+  {id:9, cat:'campus', title:'Library: new digital archive added', body:'Access 2,000+ new e-journals through the library portal using your student login.', time:'2 days ago', priority:false, read:true, bookmarked:false},
+  {id:10, cat:'campus', title:'Lost & found: black backpack', body:'A black backpack was found near the auditorium. Claim it at the security desk with ID.', time:'2 days ago', priority:false, read:false, bookmarked:false},
+  {id:11, cat:'emergency', title:'Internal exam postponed — Physics', body:'Physics internal scheduled for tomorrow is postponed to next Wednesday. Revised hall ticket to follow.', time:'10 min ago', priority:true, read:false, bookmarked:false},
+  {id:12, cat:'campus', title:'Merit scholarship applications open', body:'Apply for the 2026 merit scholarship before the 30th. Minimum CGPA 8.0 required.', time:'3 days ago', priority:false, read:false, bookmarked:false},
+];
+
+let INBOX = [
+  {id:1, dept:'Hostel & Transport', text:'Hot water in Block C has not worked for 5 days. Please look into it.', anon:true, status:'progress', time:'1 day ago'},
+  {id:2, dept:'Examinations', text:'Could the seating arrangement for finals be published earlier next time? Many of us travel from home.', anon:true, status:'open', time:'2 days ago'},
+  {id:3, dept:'Library', text:'Thank you for extending library hours during exam week — really helped!', anon:true, status:'resolved', time:'4 days ago'},
+];
+
+/* ============ STATE ============ */
+let USERS = [];          // {name, email, passHash}
+let currentUser = null;
+let currentView = 'all';
+let activeCategory = 'all';
+let isAnon = true;
+
+/* ============ THEME (manual only) ============ */
+function setTheme(mode){
+  document.documentElement.classList.toggle('dark', mode === 'dark');
+  document.getElementById('btn-light').classList.toggle('on', mode==='light');
+  document.getElementById('btn-dark').classList.toggle('on', mode==='dark');
+}
+setTheme('light'); // explicit default, no system / time based switching ever
+
+/* ============ SIMPLE HASH (demo-grade, client-side) ============ */
+async function hashPass(pw){
+  const enc = new TextEncoder().encode(pw);
+  const buf = await crypto.subtle.digest('SHA-256', enc);
+  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+
+/* ============ AUTH ============ */
+function showPanel(which){
+  document.getElementById('login-panel').style.display = which==='login' ? 'block':'none';
+  document.getElementById('register-panel').style.display = which==='register' ? 'block':'none';
+  hideError();
+}
+function showError(msg){
+  const el = document.getElementById('auth-error');
+  el.textContent = msg; el.classList.add('show');
+}
+function hideError(){ document.getElementById('auth-error').classList.remove('show'); }
+
+async function handleRegister(){
+  const name = document.getElementById('reg-name').value.trim();
+  const email = document.getElementById('reg-email').value.trim().toLowerCase();
+  const pass = document.getElementById('reg-pass').value;
+  const pass2 = document.getElementById('reg-pass2').value;
+  hideError();
+  if(!name || !email || !pass || !pass2){ showError('Please fill in every field.'); return; }
+  if(!/^\S+@\S+\.\S+$/.test(email)){ showError('Enter a valid email address.'); return; }
+  if(pass.length < 8){ showError('Password must be at least 8 characters.'); return; }
+  if(pass !== pass2){ showError('Passwords do not match.'); return; }
+  if(USERS.find(u=>u.email===email)){ showError('An account with this email already exists. Please log in.'); return; }
+  const passHash = await hashPass(pass);
+  USERS.push({name, email, passHash});
+  showToast('Account created — you can log in now.');
+  showPanel('login');
+  document.getElementById('login-email').value = email;
+}
+
+async function handleLogin(){
+  const email = document.getElementById('login-email').value.trim().toLowerCase();
+  const pass = document.getElementById('login-pass').value;
+  hideError();
+  if(!email || !pass){ showError('Enter your email and password.'); return; }
+  const user = USERS.find(u=>u.email===email);
+  if(!user){ showError('No account found for this email. Please register first.'); return; }
+  const passHash = await hashPass(pass);
+  if(passHash !== user.passHash){ showError('Incorrect password. Please try again.'); return; }
+  currentUser = user;
+  enterApp();
+}
+
+function handleLogout(){
+  currentUser = null;
+  document.getElementById('app-screen').classList.remove('active');
+  document.getElementById('auth-screen').style.display = 'flex';
+  document.getElementById('login-pass').value = '';
+  showPanel('login');
+}
+
+function enterApp(){
+  document.getElementById('auth-screen').style.display = 'none';
+  document.getElementById('app-screen').classList.add('active');
+  document.getElementById('user-name').textContent = currentUser.name;
+  document.getElementById('user-email').textContent = currentUser.email;
+  document.getElementById('user-avatar').textContent = currentUser.name.trim()[0].toUpperCase();
+  buildCategoryNav();
+  buildChipRow();
+  setView('all', document.querySelector('.nav-item[data-view="all"]'));
+  checkMobile();
+}
+
+/* ============ NAV / VIEWS ============ */
+function buildCategoryNav(){
+  const wrap = document.getElementById('category-nav');
+  wrap.innerHTML = CATEGORIES.map(c=>{
+    const n = NOTIFICATIONS.filter(x=>x.cat===c.id).length;
+    return `<div class="nav-item" data-view="cat-${c.id}" onclick="setView('cat-${c.id}', this)">
+      <span class="dot" style="background:${c.color};"></span> ${c.icon} ${c.label} <span class="count">${n}</span>
+    </div>`;
+  }).join('');
+}
+
+function setView(view, el){
+  currentView = view;
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  if(el) el.classList.add('active');
+  document.getElementById('page-inbox').style.display = view==='inbox' ? 'block':'none';
+  document.getElementById('page-all').style.display = view==='inbox' ? 'none':'block';
+
+  const titleEl = document.getElementById('page-title');
+  const subEl = document.getElementById('page-sub');
+  if(view==='all'){ titleEl.textContent='All updates'; subEl.textContent='Everything from your college, organized in one place — newest and most urgent first.'; activeCategory='all'; }
+  else if(view==='bookmarked'){ titleEl.textContent='Bookmarked'; subEl.textContent='Notifications you saved for later.'; activeCategory='all'; }
+  else if(view.startsWith('cat-')){
+    const cat = CATEGORIES.find(c=>c.id===view.replace('cat-',''));
+    titleEl.textContent = cat.label; subEl.textContent = `${cat.icon} Only ${cat.label.toLowerCase()} notifications.`; activeCategory = cat.id;
+  } else if(view==='inbox'){
+    renderInbox();
+  }
+  buildChipRow();
+  renderNotifications();
+  toggleSidebar(false);
+}
+
+function buildChipRow(){
+  const row = document.getElementById('chip-row');
+  if(currentView === 'bookmarked' || currentView === 'inbox'){ row.innerHTML=''; return; }
+  let chips = `<button class="chip ${activeCategory==='all'?'active':''}" onclick="filterChip('all')"><span class="dot" style="background:var(--ink-faint);"></span> All categories</button>`;
+  chips += CATEGORIES.map(c=>`<button class="chip ${activeCategory===c.id?'active':''}" onclick="filterChip('${c.id}')"><span class="dot" style="background:${c.color};"></span> ${c.icon} ${c.label}</button>`).join('');
+  row.innerHTML = chips;
+}
+function filterChip(cat){
+  activeCategory = cat;
+  buildChipRow();
+  renderNotifications();
+}
+
+/* ============ RENDER NOTIFICATIONS ============ */
+function renderNotifications(){
+  const grid = document.getElementById('notif-grid');
+  const q = document.getElementById('search-input').value.trim().toLowerCase();
+
+  let list = NOTIFICATIONS.slice();
+  if(currentView === 'bookmarked') list = list.filter(n=>n.bookmarked);
+  if(activeCategory !== 'all') list = list.filter(n=>n.cat===activeCategory);
+  if(q) list = list.filter(n=> (n.title+' '+n.body).toLowerCase().includes(q));
+  list.sort((a,b)=> (b.priority - a.priority));
+
+  const emStrip = document.getElementById('emergency-strip');
+  const emTop = NOTIFICATIONS.find(n=>n.priority);
+  if(emTop && currentView==='all' && activeCategory==='all' && !q){
+    emStrip.style.display='flex';
+    document.getElementById('emergency-text').textContent = '⚡ ' + emTop.title;
+    document.getElementById('emergency-sub').textContent = emTop.body;
+  } else { emStrip.style.display='none'; }
+
+  if(list.length===0){
+    grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;">
+      <div class="em-ic">🗂️</div><b>Nothing here yet</b>
+      <p style="margin:0; font-size:13px;">Try a different category or clear your search.</p>
+    </div>`;
+    return;
+  }
+
+  grid.innerHTML = list.map(n=>{
+    const cat = CATEGORIES.find(c=>c.id===n.cat);
+    return `<div class="card" style="--cat-color:${cat.color}; --cat-bg:${cat.bg};">
+      <div class="card-top">
+        <span class="cat-badge">${cat.icon} ${cat.label}</span>
+        ${!n.read ? '<span class="unread-dot"></span>' : ''}
+      </div>
+      <h3>${n.title}</h3>
+      <p>${n.body}</p>
+      <div class="card-foot">
+        <span>${n.priority ? '<span class="priority-tag">PRIORITY · </span>':''}${n.time}</span>
+        <div class="card-actions">
+          <button class="mini-btn" title="Mark as read" onclick="toggleRead(${n.id})">${n.read?'✓':'○'}</button>
+          <button class="mini-btn ${n.bookmarked?'bookmarked':''}" title="Bookmark" onclick="toggleBookmark(${n.id})">★</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+
+  updateCounts();
+}
+
+function toggleRead(id){ const n=NOTIFICATIONS.find(x=>x.id===id); n.read=!n.read; renderNotifications(); }
+function toggleBookmark(id){ const n=NOTIFICATIONS.find(x=>x.id===id); n.bookmarked=!n.bookmarked; renderNotifications(); showToast(n.bookmarked?'Saved to bookmarks':'Removed from bookmarks'); }
+
+function updateCounts(){
+  document.getElementById('count-all').textContent = NOTIFICATIONS.filter(n=>!n.read).length;
+  document.getElementById('count-bookmarked').textContent = NOTIFICATIONS.filter(n=>n.bookmarked).length;
+  document.getElementById('count-inbox').textContent = INBOX.length;
+}
+
+/* ============ INBOX ============ */
+function setAnon(val){
+  isAnon = val;
+  document.getElementById('seg-anon').classList.toggle('active', val);
+  document.getElementById('seg-named').classList.toggle('active', !val);
+}
+function submitInbox(){
+  const dept = document.getElementById('inbox-dept').value.trim() || 'Student Helpdesk';
+  const text = document.getElementById('inbox-text').value.trim();
+  if(!text){ showToast('Write a message before sending.'); return; }
+  INBOX.unshift({id:Date.now(), dept, text, anon:isAnon, status:'open', time:'just now'});
+  document.getElementById('inbox-text').value = '';
+  showToast('Message sent — your identity is ' + (isAnon ? 'hidden.' : 'visible to staff only.'));
+  renderInbox();
+  updateCounts();
+}
+function renderInbox(){
+  const list = document.getElementById('inbox-list');
+  list.innerHTML = INBOX.map(m=>{
+    const statusClass = m.status==='open'?'status-open':m.status==='progress'?'status-progress':'status-resolved';
+    const statusLabel = m.status==='open'?'Open':m.status==='progress'?'In progress':'Resolved';
+    return `<div class="inbox-item">
+      <div class="inbox-item-top">
+        <span class="anon-tag"><span class="ic">${m.anon?'🙈':'🙋'}</span> ${m.anon?'Anonymous student':'Named submission'} · ${m.dept}</span>
+        <span class="status-pill ${statusClass}">${statusLabel}</span>
+      </div>
+      <p>${m.text}</p>
+      <div class="meta">${m.time}</div>
+    </div>`;
+  }).join('');
+}
+
+/* ============ TOAST ============ */
+let toastTimer;
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>t.classList.remove('show'), 2600);
+}
+
+/* ============ MOBILE SIDEBAR ============ */
+function toggleSidebar(open){
+  document.getElementById('sidebar').classList.toggle('open', open);
+  document.getElementById('scrim').classList.toggle('show', open);
+}
+function checkMobile(){
+  document.getElementById('hamburger').style.display = window.innerWidth <= 900 ? 'flex':'none';
+}
+window.addEventListener('resize', checkMobile);
+
+/* ============ ENTER KEY SUPPORT ============ */
+document.addEventListener('keydown', e=>{
+  if(e.key==='Enter'){
+    if(document.activeElement.id==='login-pass') handleLogin();
+    if(document.activeElement.id==='reg-pass2') handleRegister();
+  }
+});
+</script>
+</body>
+</html>
